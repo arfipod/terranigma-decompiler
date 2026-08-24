@@ -31,12 +31,12 @@ jobs:
       - name: Build libretro core
         shell: bash
         run: |
-          make -C _vendor/snes9x -f Makefile.libretro platform=unix -j2
-          file _vendor/snes9x/snes9x_libretro.so
+          make -C _vendor/snes9x/libretro platform=unix -j2
+          file _vendor/snes9x/libretro/snes9x_libretro.so
       - name: Package core
         shell: bash
         run: |
-          cp _vendor/snes9x/snes9x_libretro.so .
+          cp _vendor/snes9x/libretro/snes9x_libretro.so .
           sha256sum snes9x_libretro.so > snes9x_libretro.so.sha256
       - uses: actions/upload-artifact@v4
         with:
