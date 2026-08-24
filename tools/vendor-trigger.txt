@@ -1,0 +1,1 @@
+Trigger ROM-free packaging of the public SNESRecomp framework for local Terranigma recompilation tests.
