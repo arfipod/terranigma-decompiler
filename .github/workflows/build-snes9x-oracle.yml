@@ -1,0 +1,48 @@
+name: Build ROM-free Snes9x oracle core
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-snes9x-oracle.yml'
+  pull_request:
+    paths:
+      - 'tools/snes9x-oracle-trigger.txt'
+      - '.github/workflows/build-snes9x-oracle.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Snes9x libretro
+        uses: actions/checkout@v4
+        with:
+          repository: libretro/snes9x
+          ref: master
+          path: _vendor/snes9x
+          fetch-depth: 1
+      - name: Record revision
+        shell: bash
+        run: git -C _vendor/snes9x rev-parse HEAD | tee SNES9X_COMMIT.txt
+      - name: Build libretro core
+        shell: bash
+        run: |
+          make -C _vendor/snes9x -f Makefile.libretro platform=unix -j2
+          file _vendor/snes9x/snes9x_libretro.so
+      - name: Package core
+        shell: bash
+        run: |
+          cp _vendor/snes9x/snes9x_libretro.so .
+          sha256sum snes9x_libretro.so > snes9x_libretro.so.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snes9x-libretro-linux-x86_64
+          path: |
+            snes9x_libretro.so
+            snes9x_libretro.so.sha256
+            SNES9X_COMMIT.txt
+          retention-days: 7
