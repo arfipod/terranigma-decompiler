@@ -1,1 +1,2 @@
 Trigger a temporary ROM-free Linux x86_64 Snes9x libretro core build for local differential validation.
+Retry after correcting the libretro Makefile path.
