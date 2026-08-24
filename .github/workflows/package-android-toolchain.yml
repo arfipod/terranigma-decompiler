@@ -1,0 +1,51 @@
+name: Package ROM-free Android toolchain
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/package-android-toolchain.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Locate Android SDK and NDK
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          if [ -n "${ANDROID_NDK_HOME:-}" ] && [ -d "$ANDROID_NDK_HOME" ]; then
+            NDK="$ANDROID_NDK_HOME"
+          else
+            NDK="$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          fi
+          BT="$(find "$ANDROID_SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          PLATFORM="$(find "$ANDROID_SDK_ROOT/platforms" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          echo "NDK=$NDK" | tee -a "$GITHUB_ENV"
+          echo "BT=$BT" | tee -a "$GITHUB_ENV"
+          echo "PLATFORM=$PLATFORM" | tee -a "$GITHUB_ENV"
+          echo "NDK: $NDK"
+          echo "Build-tools: $BT"
+          echo "Platform: $PLATFORM"
+      - name: Package minimal host toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p out/ndk/toolchains/llvm/prebuilt/linux-x86_64 out/sdk/build-tools out/sdk/platform
+          cp -a "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" out/ndk/toolchains/llvm/prebuilt/linux-x86_64/
+          cp -a "$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot" out/ndk/toolchains/llvm/prebuilt/linux-x86_64/
+          cp -a "$NDK/toolchains/llvm/prebuilt/linux-x86_64/lib" out/ndk/toolchains/llvm/prebuilt/linux-x86_64/
+          cp -a "$NDK/sources" out/ndk/ 2>/dev/null || true
+          cp "$BT/aapt2" "$BT/apksigner" "$BT/zipalign" "$BT/d8" out/sdk/build-tools/
+          cp "$PLATFORM/android.jar" out/sdk/platform/
+          printf 'NDK=%s\nBUILD_TOOLS=%s\nPLATFORM=%s\n' "$NDK" "$BT" "$PLATFORM" > out/VERSIONS.txt
+          du -sh out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-local-arm64-toolchain
+          path: out
+          retention-days: 2
