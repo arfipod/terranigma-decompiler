@@ -1,0 +1,48 @@
+name: Vendor SNESRecomp framework
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/vendor-snesrecomp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package-framework:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+
+      - name: Check out SNESRecomp
+        uses: actions/checkout@v4
+        with:
+          repository: mstan/snesrecomp
+          ref: main
+          path: _vendor/snesrecomp
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Record upstream revision
+        shell: bash
+        run: |
+          git -C _vendor/snesrecomp rev-parse HEAD | tee _vendor/SNESRECOMP_COMMIT.txt
+          git -C _vendor/snesrecomp status --short --branch
+
+      - name: Package public framework source
+        shell: bash
+        run: |
+          tar --exclude='.git' -czf snesrecomp-framework-linux-source.tar.gz -C _vendor snesrecomp SNESRECOMP_COMMIT.txt
+          sha256sum snesrecomp-framework-linux-source.tar.gz | tee snesrecomp-framework-linux-source.tar.gz.sha256
+
+      - name: Upload framework artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snesrecomp-framework-linux-source
+          path: |
+            snesrecomp-framework-linux-source.tar.gz
+            snesrecomp-framework-linux-source.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 7
