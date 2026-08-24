@@ -1,0 +1,41 @@
+name: Vendor reference SNESRecomp host
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/vendor-reference-host.yml'
+  pull_request:
+    paths:
+      - 'tools/reference-host-trigger.txt'
+      - '.github/workflows/vendor-reference-host.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out public reference host
+        uses: actions/checkout@v4
+        with:
+          repository: mstan/MegaManXSNESRecomp
+          ref: main
+          path: _vendor/reference
+          submodules: false
+          fetch-depth: 1
+      - name: Record revision and package source
+        shell: bash
+        run: |
+          git -C _vendor/reference rev-parse HEAD | tee _vendor/REFERENCE_COMMIT.txt
+          tar --exclude='.git' -czf snesrecomp-reference-host.tar.gz -C _vendor reference REFERENCE_COMMIT.txt
+          sha256sum snesrecomp-reference-host.tar.gz > snesrecomp-reference-host.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snesrecomp-reference-host
+          path: |
+            snesrecomp-reference-host.tar.gz
+            snesrecomp-reference-host.tar.gz.sha256
+          retention-days: 7
