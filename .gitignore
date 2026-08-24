@@ -1,0 +1,53 @@
+# Commercial ROMs / cartridge images
+*.sfc
+*.smc
+*.fig
+*.swc
+*.bin
+roms/
+ROMs/
+
+# Generated or extracted copyrighted game content
+generated/
+recomp/generated/
+extracted/
+assets/extracted/
+work/
+
+# Game outputs and saves
+*.gba
+*.srm
+*.sav
+*.state
+
+# Build products
+build/
+out/
+dist/
+CMakeFiles/
+CMakeCache.txt
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Local traces / dumps
+traces/
+dumps/
+*.trace
+*.dump
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
