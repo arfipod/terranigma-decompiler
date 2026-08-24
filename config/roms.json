@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "policy": "Only verified, user-supplied original ROM dumps are accepted as inputs. ROM contents are never stored in this repository.",
+  "roms": [
+    {
+      "id": "terranigma-spain-pal-v1",
+      "display_name": "Terranigma (Spain) PAL",
+      "format": "sfc",
+      "headered": false,
+      "size": 4194304,
+      "mapper": "HiROM",
+      "region": "PAL",
+      "sha256": "7f731f4bb620e682132660da39641dda5762211dca4732f8192dd2411211b822",
+      "sha1": "1e1a85cf28bcb69cb34fc71f48347279d7cfea7e",
+      "md5": "5223853d5edc9856f2bf8a9f04d01d3a",
+      "crc32": "00E61534"
+    }
+  ]
+}
