@@ -1,0 +1,28 @@
+name: Package Android build jars
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/package-android-build-jars.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect build-tool jars
+        shell: bash
+        run: |
+          set -euxo pipefail
+          BT="$(find "$ANDROID_SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          mkdir -p out
+          cp "$BT/lib/d8.jar" "$BT/lib/apksigner.jar" out/
+          ls -lh out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-build-jars
+          path: out
+          retention-days: 2
