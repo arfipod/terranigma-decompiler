@@ -33,16 +33,20 @@ jobs:
         run: |
           make -C _vendor/snes9x/libretro platform=unix -j2
           file _vendor/snes9x/libretro/snes9x_libretro.so
-      - name: Package core
+      - name: Package public core and source
         shell: bash
         run: |
           cp _vendor/snes9x/libretro/snes9x_libretro.so .
+          tar --exclude='.git' -czf snes9x-source.tar.gz -C _vendor snes9x
           sha256sum snes9x_libretro.so > snes9x_libretro.so.sha256
+          sha256sum snes9x-source.tar.gz > snes9x-source.tar.gz.sha256
       - uses: actions/upload-artifact@v4
         with:
           name: snes9x-libretro-linux-x86_64
           path: |
             snes9x_libretro.so
             snes9x_libretro.so.sha256
+            snes9x-source.tar.gz
+            snes9x-source.tar.gz.sha256
             SNES9X_COMMIT.txt
           retention-days: 7
