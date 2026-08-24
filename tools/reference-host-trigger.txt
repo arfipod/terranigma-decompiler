@@ -1,0 +1,1 @@
+Trigger ROM-free packaging of a public SNESRecomp reference host for local integration tests.
