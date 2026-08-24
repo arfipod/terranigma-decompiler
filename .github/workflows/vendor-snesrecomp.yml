@@ -5,6 +5,10 @@ on:
   push:
     paths:
       - '.github/workflows/vendor-snesrecomp.yml'
+  pull_request:
+    paths:
+      - 'tools/vendor-trigger.txt'
+      - '.github/workflows/vendor-snesrecomp.yml'
 
 permissions:
   contents: read
