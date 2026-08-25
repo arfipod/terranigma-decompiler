@@ -1,0 +1,35 @@
+--- a/recompiler/v2/decoder.py
++++ b/recompiler/v2/decoder.py
+@@ -2223,6 +2223,8 @@
+         # SNES stack.
+         if insn.mnem == 'PHA':
+             site_pc24 = (bank << 16) | pc
++            site_m = insn.m_flag & 1
++            site_x = insn.x_flag & 1
+             auth = (indirect_dispatch or {}).get(site_pc24)
+             if auth is not None:
+                 entries = _resolve_indirect_dispatch_targets(
+@@ -2234,6 +2236,14 @@
+                     insn.dispatch_idx_reg = auth['idx_reg']
+                     insn.dispatch_table_bases = tuple(auth.get('table_bases', ()) or ())
+                     insn.dispatch_terminal = True
++                    # Canonical PHA/SEP #$30/RTS dispatchers force M=X=1.
++                    # Explicit `rtsstack` directives model variants that PHA
++                    # and RTS without a following SEP; preserve the live site
++                    # widths in that case.
++                    forced_m = site_m if auth.get('rts_stack') else 1
++                    forced_x = site_x if auth.get('rts_stack') else 1
++                    insn.dispatch_forced_m = forced_m
++                    insn.dispatch_forced_x = forced_x
+                     labeled_succ = []
+                     for e in entries:
+                         if e is None or e == 0:
+@@ -2242,7 +2252,7 @@
+                         e16 = e & 0xFFFF
+                         if eb == bank and 0x8000 <= e16 <= 0xFFFF:
+                             labeled_succ.append(
+-                                (DecodeKey(addr24(eb, e16), 1, 1, ()),
++                                (DecodeKey(addr24(eb, e16), forced_m, forced_x, ()),
+                                  'jump'))
+                     succ = [k for (k, _) in labeled_succ]
+                     graph.insns[key] = DecodedInsn(key=key, insn=insn,

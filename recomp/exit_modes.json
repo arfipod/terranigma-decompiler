@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "variants": [
+    {"pc24": "85FC52", "entry_m": 1, "entry_x": 0, "exit_m": 1, "exit_x": 0, "reason": "DMA helper restores S with TXS, restores M=1 with SEP #$20, then RTS"},
+    {"pc24": "85FCBA", "entry_m": 1, "entry_x": 0, "exit_m": 1, "exit_x": 0, "reason": "VRAM upload helper restores S with TXS, reaches SEP #$20 on both paths, then RTS"}
+  ]
+}
