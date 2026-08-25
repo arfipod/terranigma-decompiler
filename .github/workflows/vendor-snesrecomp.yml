@@ -5,9 +5,11 @@ on:
   push:
     paths:
       - '.github/workflows/vendor-snesrecomp.yml'
+      - 'patches/snesrecomp-*.patch'
   pull_request:
     paths:
       - 'tools/vendor-trigger.txt'
+      - 'patches/snesrecomp-*.patch'
       - '.github/workflows/vendor-snesrecomp.yml'
 
 permissions:
@@ -35,10 +37,18 @@ jobs:
           git -C _vendor/snesrecomp rev-parse HEAD | tee _vendor/SNESRECOMP_COMMIT.txt
           git -C _vendor/snesrecomp status --short --branch
 
+      - name: Apply project compatibility patch
+        shell: bash
+        run: |
+          git -C _vendor/snesrecomp apply --check "$GITHUB_WORKSPACE/patches/snesrecomp-rtsstack-live-mx.patch"
+          git -C _vendor/snesrecomp apply "$GITHUB_WORKSPACE/patches/snesrecomp-rtsstack-live-mx.patch"
+          sha256sum patches/snesrecomp-rtsstack-live-mx.patch | tee _vendor/SNESRECOMP_PATCHSET.txt
+          git -C _vendor/snesrecomp diff --check
+
       - name: Package public framework source
         shell: bash
         run: |
-          tar --exclude='.git' -czf snesrecomp-framework-linux-source.tar.gz -C _vendor snesrecomp SNESRECOMP_COMMIT.txt
+          tar --exclude='.git' -czf snesrecomp-framework-linux-source.tar.gz -C _vendor snesrecomp SNESRECOMP_COMMIT.txt SNESRECOMP_PATCHSET.txt
           sha256sum snesrecomp-framework-linux-source.tar.gz | tee snesrecomp-framework-linux-source.tar.gz.sha256
 
       - name: Upload framework artifact

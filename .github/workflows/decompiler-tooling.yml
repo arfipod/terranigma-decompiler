@@ -1,0 +1,43 @@
+name: Decompiler tooling
+
+on:
+  push:
+    paths:
+      - 'tools/decompile_terranigma.py'
+      - 'tests/test_decompile_terranigma.py'
+      - 'recomp/**'
+      - 'patches/snesrecomp-*.patch'
+      - '.github/workflows/decompiler-tooling.yml'
+  pull_request:
+    paths:
+      - 'tools/decompile_terranigma.py'
+      - 'tests/test_decompile_terranigma.py'
+      - 'recomp/**'
+      - 'patches/snesrecomp-*.patch'
+      - '.github/workflows/decompiler-tooling.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rom-free-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile front-end
+        run: python -m py_compile tools/decompile_terranigma.py
+      - name: Run ROM-free unit tests
+        run: python -m unittest tests/test_decompile_terranigma.py -v
+
+  patch-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mstan/snesrecomp
+          ref: main
+          path: _vendor/snesrecomp
+          fetch-depth: 1
+      - name: Check SNESRecomp compatibility patch
+        run: git -C _vendor/snesrecomp apply --check "$GITHUB_WORKSPACE/patches/snesrecomp-rtsstack-live-mx.patch"
